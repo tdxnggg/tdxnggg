@@ -1,0 +1,343 @@
+/* Khởi tạo cấu hình và Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    overflow: hidden; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 1. HIỆU ỨNG MÀN HÌNH CHÀO (LOADING SCREEN) */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s cubic-bezier(0.65, 0, 0.35, 1), visibility 1s;
+}
+
+.loader-title {
+    font-family: 'Dancing Script', cursive; /* Đổi font chữ viết tay chuyên nghiệp hơn */
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    opacity: 0;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    animation: fadeInTitle 1.5s ease forwards 0.3s, floatTitle 5s ease-in-out infinite 1.8s;
+}
+
+.loader-bar {
+    width: 0;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    animation: loadBar 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes fadeInTitle {
+    to { opacity: 1; transform: translateY(-5px); }
+}
+
+@keyframes floatTitle {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes loadBar {
+    to { width: 150px; }
+}
+
+/* 2. HIỆU ỨNG HẠT NỀN (PARTICLES CANVAS) */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Video Nền */
+.video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -3;
+    object-fit: cover;
+    filter: brightness(25%) contrast(110%);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+    z-index: -2;
+}
+
+/* 3. KHUNG CHỨA LINKTREE CHÍNH */
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 40px 24px;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1) 0.5s;
+}
+
+.container.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hiệu ứng lơ lửng mượt mà cho cụm Avatar */
+.avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 28px;
+    animation: floatAvatar 6s ease-in-out infinite;
+}
+
+/* Vòng tròn ma mị xoay quanh avatar */
+.avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    animation: spinRing 12s linear infinite;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    object-fit: cover;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.08) rotate(3deg);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.15);
+}
+
+/* Font chữ viết tay lơ lửng phát sáng nghệ thuật */
+.profile-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2.8rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-bottom: 12px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 4px 10px rgba(0, 0, 0, 0.5);
+    animation: floatName 4.5s ease-in-out infinite;
+    display: inline-block;
+}
+
+.profile-bio {
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: #b0b0b0;
+    text-transform: uppercase;
+    margin-bottom: 35px;
+    opacity: 0.85;
+    position: relative;
+}
+
+/* Thêm gạch chân mờ nhỏ tinh tế dưới Bio */
+.profile-bio::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes floatAvatar {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes spinRing {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes floatName {
+    0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+/* 4. THIẾT KẾ LINK VÀ HIỆU ỨNG TƯƠNG TÁC BIẾN ĐỔI MÀU SẮC */
+.links-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.link-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px; /* Bo góc nhẹ nhìn hiện đại thanh thoát hơn */
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    overflow: hidden;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                box-shadow 0.4s ease, 
+                background 0.4s ease, 
+                color 0.4s ease, 
+                border-color 0.4s ease;
+}
+
+/* Vệt sáng lướt qua cực mượt */
+.link-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transform: skewX(-25deg);
+}
+
+.link-item:hover::after {
+    left: 150%;
+    transition: all 0.9s cubic-bezier(0.3, 1, 0.4, 1);
+}
+
+/* Hiệu ứng Hover chung */
+.link-item:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #000000;
+    border-color: #ffffff;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+}
+
+/* Icon xoay vòng nhẹ khi hover */
+.link-item i {
+    font-size: 1.2rem;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s;
+}
+
+.link-item:hover i {
+    transform: scale(1.2) rotate(360deg);
+}
+
+/* Hiệu ứng màu sắc Icon thương hiệu riêng biệt khi hover vào từng nút */
+.link-item:nth-child(1):hover i { color: #5865F2; } /* Màu xanh Discord */
+.link-item:nth-child(2):hover i { color: #1877F2; } /* Màu xanh Facebook */
+.link-item:nth-child(3):hover i { color: #E1306C; } /* Màu hồng Instagram */
+
+.discord-item {
+    justify-content: center;
+}
+.link-text {
+    display: flex;
+    gap: 6px;
+}
+.link-text span { font-weight: 300; opacity: 0.8;}
+
+/* Nhãn thông báo trạng thái copy Discord */
+.tooltip {
+    position: absolute;
+    top: -30px;
+    background: #ffffff;
+    color: #000000;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+.link-item:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    top: -38px;
+}
+
+/* Nút điều khiển âm nhạc góc màn hình */
+.music-control {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 100;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    animation: pulseButton 3s ease-in-out infinite;
+}
+
+.music-control:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255,255,255,0.15);
+}
+
+@keyframes pulseButton {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
+    50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+}
+
+#youtube-player { display: block; }
