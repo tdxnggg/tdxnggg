@@ -1,44 +1,42 @@
-// CHỈNH SỬA TẠI ĐÂY: Sửa ID video YouTube của bạn
+
 const youtubeVideoId = 'gJAbDSse5WM'; 
 
 var player;
 var apiReady = false;
 
-/* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & AUTOPLAY */
+
 window.addEventListener('load', () => {
-    // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load thẩm mỹ ban đầu
+  
     setTimeout(() => {
-        // Kiểm tra nếu YouTube đã load xong ngầm trước đó thì hiện nút ngay, 
-        // nếu chưa xong thì hàm onPlayerReady bên dưới sẽ đảm nhận việc hiện nút.
+      
         if (apiReady) {
             document.getElementById('enter-btn').style.display = 'block';
         }
     }, 2000); 
 });
 
-// Hàm này kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
+
 function startPortfolio() {
     const loader = document.getElementById('loader');
     const container = document.querySelector('.container');
     
-    // Ẩn màn hình chào đi mượt mà
+ 
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
     document.body.style.overflow = 'auto';
     
-    // Kích hoạt hiệu ứng xuất hiện mịn màng cho Linktree
+
     container.classList.add('active');
 
-    // ÉP AUTOPLAY: Vì người dùng vừa click vào nút này, trình duyệt xem đây là tương tác hợp lệ và CHO PHÉP phát nhạc!
+   
     if (apiReady && player) {
         player.playVideo();
-        // Cập nhật giao diện nút điều khiển nhạc ở màn hình chính thành trạng thái đang phát
         document.getElementById('musicText').innerText = "Tắt Nhạc";
         document.getElementById('musicIcon').className = "fas fa-pause";
     }
 }
 
-/* 2. SỬ DỤNG YOUTUBE API PHÁT NHẠC KHÔNG QUẢNG CÁO */
+ 2. SỬ DỤNG YOUTUBE API PHÁT NHẠC KHÔNG QUẢNG CÁO */
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -50,7 +48,7 @@ function onYouTubeIframeAPIReady() {
         width: '0',
         videoId: youtubeVideoId,
         playerVars: {
-            'autoplay': 0, // Ban đầu để 0, sẽ ép play bằng hàm startPortfolio() sau click
+            'autoplay': 0, 
             'controls': 0,
             'loop': 1,
             'playlist': youtubeVideoId,
@@ -64,8 +62,7 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
     apiReady = true;
-    // Đảm bảo nút chỉ xuất hiện khi cả YouTube API sẵn sàng VÀ thanh load đã chạy đủ thời gian
-    // (Tránh trường hợp mạng quá nhanh, hiện nút trước khi thanh bar chạy xong nhìn bị lỗi giao diện)
+    
     const loader = document.getElementById('loader');
     if (loader) {
         // Hiện nút "Khám phá ngay"
