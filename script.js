@@ -1,4 +1,4 @@
-// CHỈNH SỬA TẠI ĐÂY: Sửa ID video YouTube của bạn
+// nhạc YouTube
 const youtubeVideoId = 'gJAbDSse5WM'; 
 
 var player;
@@ -6,7 +6,7 @@ var apiReady = false;
 
 /* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & AUTOPLAY */
 window.addEventListener('load', () => {
-    // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load thẩm mỹ ban đầu
+    // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load 
     setTimeout(() => {
         // Kiểm tra nếu YouTube đã load xong ngầm trước đó thì hiện nút ngay, 
         // nếu chưa xong thì hàm onPlayerReady bên dưới sẽ đảm nhận việc hiện nút.
@@ -16,20 +16,20 @@ window.addEventListener('load', () => {
     }, 2000); 
 });
 
-// Hàm này kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
+// khi người dùng bấm vào nút "Khám phá ngay"
 function startPortfolio() {
     const loader = document.getElementById('loader');
     const container = document.querySelector('.container');
     
-    // Ẩn màn hình chào đi mượt mà
+    // Ẩn màn hình chào
     loader.style.opacity = '0';
     loader.style.visibility = 'hidden';
     document.body.style.overflow = 'auto';
     
-    // Kích hoạt hiệu ứng xuất hiện mịn màng cho Linktree
+    // Kích hoạt hiệu ứng xuất hiện cho Linktree
     container.classList.add('active');
 
-    // ÉP AUTOPLAY: Vì người dùng vừa click vào nút này, trình duyệt xem đây là tương tác hợp lệ và CHO PHÉP phát nhạc!
+    //  AUTOPLAY: 
     if (apiReady && player) {
         player.playVideo();
         // Cập nhật giao diện nút điều khiển nhạc ở màn hình chính thành trạng thái đang phát
@@ -50,7 +50,7 @@ function onYouTubeIframeAPIReady() {
         width: '0',
         videoId: youtubeVideoId,
         playerVars: {
-            'autoplay': 0, // Ban đầu để 0, sẽ ép play bằng hàm startPortfolio() sau click
+            'autoplay': 0, // 
             'controls': 0,
             'loop': 1,
             'playlist': youtubeVideoId,
