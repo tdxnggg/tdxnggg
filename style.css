@@ -33,7 +33,7 @@ body {
 }
 
 .loader-title {
-    font-family: 'Dancing Script', cursive; /* Đổi font chữ viết tay chuyên nghiệp hơn */
+    font-family: 'Dancing Script', cursive; 
     font-size: clamp(3rem, 6vw, 4.5rem);
     font-weight: 700;
     color: #fff;
@@ -117,7 +117,7 @@ body {
     transform: translateY(0);
 }
 
-/* Hiệu ứng lơ lửng mượt mà cho cụm Avatar */
+/* Hiệu ứng lơ lửng cho cụm Avatar */
 .avatar-wrapper {
     position: relative;
     width: 120px;
@@ -126,7 +126,7 @@ body {
     animation: floatAvatar 6s ease-in-out infinite;
 }
 
-/* Vòng tròn ma mị xoay quanh avatar */
+/* Vòng tròn xoay quanh avatar */
 .avatar-wrapper::before {
     content: '';
     position: absolute;
@@ -151,7 +151,7 @@ body {
     box-shadow: 0 20px 40px rgba(255,255,255,0.15);
 }
 
-/* Font chữ viết tay lơ lửng phát sáng nghệ thuật */
+/* Font chữ viết tay lơ lửng  */
 .profile-name {
     font-family: 'Dancing Script', cursive;
     font-size: clamp(2.8rem, 5vw, 3.5rem);
@@ -175,7 +175,7 @@ body {
     position: relative;
 }
 
-/* Thêm gạch chân mờ nhỏ tinh tế dưới Bio */
+/* gạch chân mờ nhỏ dưới Bio */
 .profile-bio::after {
     content: '';
     position: absolute;
@@ -218,7 +218,7 @@ body {
     padding: 18px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px; /* Bo góc nhẹ nhìn hiện đại thanh thoát hơn */
+    border-radius: 4px; 
     color: #fff;
     text-decoration: none;
     font-size: 0.95rem;
@@ -236,7 +236,7 @@ body {
                 border-color 0.4s ease;
 }
 
-/* Vệt sáng lướt qua cực mượt */
+/* Vệt sáng lướt qua */
 .link-item::after {
     content: '';
     position: absolute;
@@ -272,7 +272,7 @@ body {
     transform: scale(1.2) rotate(360deg);
 }
 
-/* Hiệu ứng màu sắc Icon thương hiệu riêng biệt khi hover vào từng nút */
+/* Hiệu ứng màu sắc Icon từng nút */
 .link-item:nth-child(1):hover i { color: #5865F2; } /* Màu xanh Discord */
 .link-item:nth-child(2):hover i { color: #1877F2; } /* Màu xanh Facebook */
 .link-item:nth-child(3):hover i { color: #E1306C; } /* Màu hồng Instagram */
