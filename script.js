@@ -168,3 +168,41 @@ function copyDiscordName(username) {
         console.error('Không thể copy: ', err);
     });
 }
+// ==========================================
+// CẤU HÌNH VÀ KẾT NỐI GOOGLE FIREBASE
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDEtQJlH3VkckUvvEfsxR0KJX3ZWpUIip8",
+  authDomain: "portfolio-84784.firebaseapp.com",
+  projectId: "portfolio-84784",
+  storageBucket: "portfolio-84784.firebasestorage.app",
+  messagingSenderId: "695481380114",
+  appId: "1:695481380114:web:188cdab99dc8aac05d57cb",
+  measurementId: "G-XPW1WL3ZMX",
+  // Tự động suy luận URL Realtime Database dựa theo Project ID
+  databaseURL: "https://portfolio-84784-default-rtdb.firebaseio.com" 
+};
+
+// Khởi tạo Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// Hàm xử lý đếm lượt truy cập đám mây
+function handleVisitorCounter() {
+    const counterRef = database.ref('visitor_count');
+
+    // Dùng transaction để tăng số chính xác, phòng trường hợp nhiều người vào cùng một lúc
+    counterRef.transaction((currentCount) => {
+        return (currentCount || 0) + 1;
+    }, (error, committed, snapshot) => {
+        if (committed) {
+            // Cập nhật số liệu mới nhất từ Firebase lên màn hình
+            const countEl = document.getElementById('count');
+            if (countEl) {
+                countEl.innerText = snapshot.val().toLocaleString(); // Định dạng dấu phẩy nếu số lớn (VD: 1,000)
+            }
+        } else {
+            console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
+        }
+    });
+}
