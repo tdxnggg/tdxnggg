@@ -1,4 +1,3 @@
-
 const youtubeVideoId = 'gJAbDSse5WM'; 
 
 var player;
