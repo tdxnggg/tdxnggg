@@ -4,19 +4,46 @@ const youtubeVideoId = 'gJAbDSse5WM';
 var player;
 var apiReady = false;
 
-/* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & AUTOPLAY */
+// ==========================================
+// CẤU HÌNH VÀ KẾT NỐI GOOGLE FIREBASE
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyDEtQJlH3VkckUvvEfsxR0KJX3ZWpUIip8",
+    authDomain: "portfolio-84784.firebaseapp.com",
+    projectId: "portfolio-84784",
+    storageBucket: "portfolio-84784.firebasestorage.app",
+    messagingSenderId: "695481380114",
+    appId: "1:695481380114:web:188cdab99dc8aac05d57cb",
+    measurementId: "G-XPW1WL3ZMX",
+    databaseURL: "https://portfolio-84784-default-rtdb.firebaseio.com" 
+};
+
+// Khởi tạo Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = firebase.database();
+const counterRef = database.ref('visitor_count');
+
+/* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & LẤY LƯỢT XEM SỚM */
 window.addEventListener('load', () => {
+    // [Tối ưu] Đọc số lượt xem hiện tại từ database hiển thị lên trước khi bấm nút
+    counterRef.on('value', (snapshot) => {
+        const countEl = document.getElementById('count');
+        if (countEl && snapshot.exists()) {
+            countEl.innerText = snapshot.val().toLocaleString();
+        }
+    });
+
     // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load 
     setTimeout(() => {
-        // Kiểm tra nếu YouTube đã load xong ngầm trước đó thì hiện nút ngay, 
-        // nếu chưa xong thì hàm onPlayerReady bên dưới sẽ đảm nhận việc hiện nút.
         if (apiReady) {
             document.getElementById('enter-btn').style.display = 'block';
         }
     }, 2000); 
 });
 
-// kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
+// Kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
 function startPortfolio() {
     const loader = document.getElementById('loader');
     const container = document.querySelector('.container');
@@ -29,14 +56,26 @@ function startPortfolio() {
     // Kích hoạt hiệu ứng xuất hiện mịn màng cho Linktree
     container.classList.add('active');
 
-    // AUTOPLAY
+    // AUTOPLAY NHẠC
     if (apiReady && player) {
         player.playVideo();
-        // Cập nhật giao diện nút điều khiển nhạc ở màn hình chính thành trạng thái đang phát
         document.getElementById('musicText').innerText = "Tắt Nhạc";
         document.getElementById('musicIcon').className = "fas fa-pause";
     }
-    handleVisitorCounter(); 
+
+    // [Tối ưu] Thực hiện tăng +1 lượt xem khi bấm nút khám phá
+    increaseVisitorCount(); 
+}
+
+// Hàm tăng lượt truy cập đám mây bảo mật
+function increaseVisitorCount() {
+    counterRef.transaction((currentCount) => {
+        return (currentCount || 0) + 1;
+    }, (error, committed, snapshot) => {
+        if (!committed) {
+            console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
+        }
+    });
 }
 
 /* 2. SỬ DỤNG YOUTUBE API PHÁT NHẠC KHÔNG QUẢNG CÁO */
@@ -65,11 +104,8 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
     apiReady = true;
-    // Đảm bảo nút chỉ xuất hiện khi cả YouTube API sẵn sàng VÀ thanh load đã chạy đủ thời gian
-    // (Tránh trường hợp mạng quá nhanh, hiện nút trước khi thanh bar chạy xong nhìn bị lỗi giao diện)
     const loader = document.getElementById('loader');
     if (loader) {
-        // Hiện nút "Khám phá ngay"
         document.getElementById('enter-btn').style.display = 'block';
     }
 }
@@ -78,7 +114,6 @@ function onPlayerReady(event) {
 function toggleMusic() {
     if (!player || !apiReady) return;
     
-    // Lấy trạng thái hiện tại từ chính YouTube Player (1 có nghĩa là đang phát)
     var state = player.getPlayerState();
     const musicIcon = document.getElementById('musicIcon');
     const musicText = document.getElementById('musicText');
@@ -162,48 +197,16 @@ function copyDiscordName(username) {
         tooltip.style.background = "#ffffff";
         tooltip.style.color = "#000000";
         
+        // Sửa lỗi hiển thị tooltip nhỏ
+        tooltip.style.opacity = "1";
+        tooltip.style.visibility = "visible";
+        
         setTimeout(() => {
             tooltip.innerText = "Click để copy";
+            tooltip.style.opacity = "";
+            tooltip.style.visibility = "";
         }, 2000);
     }).catch(err => {
         console.error('Không thể copy: ', err);
-    });
-}
-// ==========================================
-// CẤU HÌNH VÀ KẾT NỐI GOOGLE FIREBASE
-// ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyDEtQJlH3VkckUvvEfsxR0KJX3ZWpUIip8",
-  authDomain: "portfolio-84784.firebaseapp.com",
-  projectId: "portfolio-84784",
-  storageBucket: "portfolio-84784.firebasestorage.app",
-  messagingSenderId: "695481380114",
-  appId: "1:695481380114:web:188cdab99dc8aac05d57cb",
-  measurementId: "G-XPW1WL3ZMX",
-  // Tự động suy luận URL Realtime Database dựa theo Project ID
-  databaseURL: "https://portfolio-84784-default-rtdb.firebaseio.com" 
-};
-
-// Khởi tạo Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
-// Hàm xử lý đếm lượt truy cập đám mây
-function handleVisitorCounter() {
-    const counterRef = database.ref('visitor_count');
-
-    // Dùng transaction để tăng số chính xác, phòng trường hợp nhiều người vào cùng một lúc
-    counterRef.transaction((currentCount) => {
-        return (currentCount || 0) + 1;
-    }, (error, committed, snapshot) => {
-        if (committed) {
-            // Cập nhật số liệu mới nhất từ Firebase lên màn hình
-            const countEl = document.getElementById('count');
-            if (countEl) {
-                countEl.innerText = snapshot.val().toLocaleString(); // Định dạng dấu phẩy nếu số lớn (VD: 1,000)
-            }
-        } else {
-            console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
-        }
     });
 }
