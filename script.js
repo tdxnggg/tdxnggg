@@ -36,6 +36,7 @@ function startPortfolio() {
         document.getElementById('musicText').innerText = "Tắt Nhạc";
         document.getElementById('musicIcon').className = "fas fa-pause";
     }
+    handleVisitorCounter(); 
 }
 
 /* 2. SỬ DỤNG YOUTUBE API PHÁT NHẠC KHÔNG QUẢNG CÁO */
