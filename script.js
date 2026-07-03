@@ -27,20 +27,23 @@ const counterRef = database.ref('visitor_count');
 
 /* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & LẤY LƯỢT XEM SỚM */
 window.addEventListener('load', () => {
-    // [Tối ưu] Đọc số lượt xem hiện tại từ database hiển thị lên trước khi bấm nút
+    // Đọc số lượt xem realtime liên tục từ database hiển thị lên trước khi bấm nút
     counterRef.on('value', (snapshot) => {
         const countEl = document.getElementById('count');
         if (countEl && snapshot.exists()) {
             countEl.innerText = snapshot.val().toLocaleString();
+        } else if (countEl) {
+            countEl.innerText = "0"; // Nếu database trống thì hiện số 0
         }
     });
 
-    // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load 
+    // Đợi tối đa 2.5 giây, nếu API YouTube chưa phản hồi thì vẫn hiện nút để tránh kẹt màn hình chào
     setTimeout(() => {
-        if (apiReady) {
-            document.getElementById('enter-btn').style.display = 'block';
+        const enterBtn = document.getElementById('enter-btn');
+        if (enterBtn) {
+            enterBtn.style.display = 'block';
         }
-    }, 2000); 
+    }, 2500); 
 });
 
 // Kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
@@ -63,18 +66,18 @@ function startPortfolio() {
         document.getElementById('musicIcon').className = "fas fa-pause";
     }
 
-    // [Tối ưu] Thực hiện tăng +1 lượt xem khi bấm nút khám phá
+    // Thực hiện tăng +1 lượt xem ổn định
     increaseVisitorCount(); 
 }
 
-// Hàm tăng lượt truy cập đám mây bảo mật
+// Hàm tăng lượt truy cập tối ưu hóa, sửa lỗi kẹt thiết bị ngoại vi
 function increaseVisitorCount() {
-    counterRef.transaction((currentCount) => {
-        return (currentCount || 0) + 1;
-    }, (error, committed, snapshot) => {
-        if (!committed) {
-            console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
-        }
+    counterRef.once('value').then((snapshot) => {
+        let currentCount = snapshot.val() || 0;
+        // Tăng thêm 1 và lưu lại
+        counterRef.set(currentCount + 1);
+    }).catch((error) => {
+        console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
     });
 }
 
@@ -104,9 +107,9 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
     apiReady = true;
-    const loader = document.getElementById('loader');
-    if (loader) {
-        document.getElementById('enter-btn').style.display = 'block';
+    const enterBtn = document.getElementById('enter-btn');
+    if (enterBtn) {
+        enterBtn.style.display = 'block';
     }
 }
 
@@ -197,7 +200,6 @@ function copyDiscordName(username) {
         tooltip.style.background = "#ffffff";
         tooltip.style.color = "#000000";
         
-        // Sửa lỗi hiển thị tooltip nhỏ
         tooltip.style.opacity = "1";
         tooltip.style.visibility = "visible";
         
