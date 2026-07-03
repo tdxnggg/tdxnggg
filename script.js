@@ -1,0 +1,212 @@
+// nhạc YouTube 
+const youtubeVideoId = 'gJAbDSse5WM'; 
+
+var player;
+var apiReady = false;
+
+// ==========================================
+// CẤU HÌNH VÀ KẾT NỐI GOOGLE FIREBASE
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCZUBSKGOhA1wCaS64w1lFcNGOGk7L1m_8",
+  authDomain: "portfolio-e1c54.firebaseapp.com",
+  databaseURL: "https://portfolio-e1c54-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "portfolio-e1c54",
+  storageBucket: "portfolio-e1c54.firebasestorage.app",
+  messagingSenderId: "948969322763",
+  appId: "1:948969322763:web:cce48ee0f68c0ac63f0a0e",
+  measurementId: "G-QZKEXKWEZ9"
+};
+
+// Khởi tạo Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = firebase.database();
+const counterRef = database.ref('visitor_count');
+
+/* 1. XỬ LÝ MÀN HÌNH CHÀO (LOADING SCREEN) & LẤY LƯỢT XEM SỚM */
+window.addEventListener('load', () => {
+    // [Tối ưu] Đọc số lượt xem hiện tại từ database hiển thị lên trước khi bấm nút
+    counterRef.on('value', (snapshot) => {
+        const countEl = document.getElementById('count');
+        if (countEl && snapshot.exists()) {
+            countEl.innerText = snapshot.val().toLocaleString();
+        }
+    });
+
+    // Đợi 2 giây cho thanh bar chạy xong hiệu ứng load 
+    setTimeout(() => {
+        if (apiReady) {
+            document.getElementById('enter-btn').style.display = 'block';
+        }
+    }, 2000); 
+});
+
+// Kích hoạt khi người dùng bấm vào nút "Khám phá ngay"
+function startPortfolio() {
+    const loader = document.getElementById('loader');
+    const container = document.querySelector('.container');
+    
+    // Ẩn màn hình chào đi mượt mà
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    document.body.style.overflow = 'auto';
+    
+    // Kích hoạt hiệu ứng xuất hiện mịn màng cho Linktree
+    container.classList.add('active');
+
+    // AUTOPLAY NHẠC
+    if (apiReady && player) {
+        player.playVideo();
+        document.getElementById('musicText').innerText = "Tắt Nhạc";
+        document.getElementById('musicIcon').className = "fas fa-pause";
+    }
+
+    // [Tối ưu] Thực hiện tăng +1 lượt xem khi bấm nút khám phá
+    increaseVisitorCount(); 
+}
+
+// Hàm tăng lượt truy cập đám mây bảo mật
+function increaseVisitorCount() {
+    counterRef.transaction((currentCount) => {
+        return (currentCount || 0) + 1;
+    }, (error, committed, snapshot) => {
+        if (!committed) {
+            console.error("Lỗi đồng bộ bộ đếm với Firebase:", error);
+        }
+    });
+}
+
+/* 2. SỬ DỤNG YOUTUBE API PHÁT NHẠC KHÔNG QUẢNG CÁO */
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: youtubeVideoId,
+        playerVars: {
+            'autoplay': 0, 
+            'controls': 0,
+            'loop': 1,
+            'playlist': youtubeVideoId,
+            'rel': 0
+        },
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    apiReady = true;
+    const loader = document.getElementById('loader');
+    if (loader) {
+        document.getElementById('enter-btn').style.display = 'block';
+    }
+}
+
+// Chức năng Bật/Tắt nhạc chủ động của nút bấm ở màn hình chính
+function toggleMusic() {
+    if (!player || !apiReady) return;
+    
+    var state = player.getPlayerState();
+    const musicIcon = document.getElementById('musicIcon');
+    const musicText = document.getElementById('musicText');
+
+    if (state === 1) { 
+        player.pauseVideo(); 
+        musicText.innerText = "Bật Nhạc";
+        musicIcon.className = "fas fa-music";
+    } else { 
+        player.playVideo(); 
+        musicText.innerText = "Tắt Nhạc";
+        musicIcon.className = "fas fa-pause";
+    }
+}
+
+/* 3. HIỆU ỨNG HẠT BỤI BAY LƠ LỬNG (PARTICLE EFFECT) */
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+
+let particlesArray = [];
+const numberOfParticles = 45; 
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.5 + 0.5; 
+        this.speedX = Math.random() * 0.2 - 0.1; 
+        this.speedY = Math.random() * 0.4 - 0.3; 
+        this.alpha = Math.random() * 0.5 + 0.1; 
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.y < 0) this.y = canvas.height;
+        if (this.x < 0 || this.x > canvas.width) this.x = Math.random() * canvas.width;
+    }
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function initParticles() {
+    for (let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+    }
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].draw();
+    }
+    requestAnimationFrame(animateParticles);
+}
+
+initParticles();
+animateParticles();
+
+/* 4. CHỨC NĂNG CLICK TỰ ĐỘNG COPY USERNAME DISCORD */
+function copyDiscordName(username) {
+    navigator.clipboard.writeText(username).then(() => {
+        const tooltip = document.getElementById('discordTooltip');
+        tooltip.innerText = "Đã sao chép!";
+        tooltip.style.background = "#ffffff";
+        tooltip.style.color = "#000000";
+        
+        // Sửa lỗi hiển thị tooltip nhỏ
+        tooltip.style.opacity = "1";
+        tooltip.style.visibility = "visible";
+        
+        setTimeout(() => {
+            tooltip.innerText = "Click để copy";
+            tooltip.style.opacity = "";
+            tooltip.style.visibility = "";
+        }, 2000);
+    }).catch(err => {
+        console.error('Không thể copy: ', err);
+    });
+}
