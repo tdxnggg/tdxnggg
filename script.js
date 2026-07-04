@@ -71,6 +71,7 @@ function typeWriter() {
 // 2. CÁC HÀM XỬ LÝ CHÍNH & VÀO GIAO DIỆN
 // ==========================================================
 window.addEventListener('load', () => {
+    // Lắng nghe thời gian thực để cập nhật số lượt xem hiển thị trên giao diện chính
     counterRef.on('value', (snapshot) => {
         const countEl = document.getElementById('count');
         if (countEl && snapshot.exists()) {
@@ -105,21 +106,32 @@ function startPortfolio() {
     increaseVisitorCount(); 
 }
 
+// HÀM KIỂM TRA ĐỊA CHỈ IP ĐỘC NHẤT ĐÃ ĐƯỢC CHỈNH SỬA
 function increaseVisitorCount() {
-    counterRef.transaction((currentCount) => (currentCount || 0) + 1);
-
     fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
         .then(data => {
-            database.ref('visitor_logs').push({
-                ip: data.ip,
-                timestamp: new Date().toLocaleString()
+            // Thay thế tất cả dấu chấm (.) trong chuỗi IP thành dấu gạch dưới (_) để làm key hợp lệ trong Firebase
+            const userIP = data.ip.replace(/\./g, '_');
+            const ipRef = database.ref('visited_ips/' + userIP);
+
+            // Kiểm tra xem IP này đã từng vào trang web của bạn chưa
+            ipRef.once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    // Nếu IP này đã tồn tại trong node 'visited_ips', dừng xử lý và KHÔNG tăng bộ đếm
+                    console.log("IP đã tồn tại. Bỏ qua ghi nhận để tránh lặp dữ liệu.");
+                } else {
+                    // Nếu là IP mới hoàn toàn:
+                    // 1. Lưu IP này thành một Key duy nhất trên Firebase Console để đánh dấu
+                    ipRef.set(true);
+
+                    // 2. Tăng tổng lượt truy cập thực tế lên 1 đơn vị bằng cơ chế Transaction an toàn
+                    counterRef.transaction((currentCount) => (currentCount || 0) + 1);
+                }
             });
-        }).catch(() => {
-            database.ref('visitor_logs').push({
-                ip: "Ẩn danh",
-                timestamp: new Date().toLocaleString()
-            });
+        })
+        .catch((error) => {
+            console.error("Lỗi lấy IP, hệ thống chuyển sang chế độ fallback an toàn:", error);
         });
 }
 
