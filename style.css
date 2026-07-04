@@ -1,0 +1,527 @@
+/* Khởi tạo cấu hình và Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    user-select: none; /* Tránh việc người dùng bôi đen chữ khi tương tác */
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    overflow: hidden; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    perspective: 1000px; /* Tạo chiều sâu không gian khi panel trượt */
+}
+
+/* 1. HIỆU ỨNG MÀN HÌNH CHÀO (LOADING SCREEN) - GIỮ NGUYÊN */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s cubic-bezier(0.65, 0, 0.35, 1), visibility 1s;
+}
+
+.loader-title {
+    font-family: 'Dancing Script', cursive; 
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    opacity: 0;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    animation: fadeInTitle 1.5s ease forwards 0.3s, floatTitle 5s ease-in-out infinite 1.8s;
+}
+
+.loader-bar {
+    width: 0;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    animation: loadBar 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes fadeInTitle {
+    to { opacity: 1; transform: translateY(-5px); }
+}
+
+@keyframes floatTitle {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes loadBar {
+    to { width: 150px; }
+}
+
+/* 2. HIỆU ỨNG HẠT NỀN VÀ BACKGROUND VIDEO - GIỮ NGUYÊN */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* THÀNH PHẦN MỚI: HIỆU ỨNG VỆT SÁNG THEO CHUỘT CAO CẤP */
+#mouse-glow {
+    position: fixed;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    opacity: 0;
+}
+body:hover #mouse-glow {
+    opacity: 1;
+}
+
+.video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -3;
+    object-fit: cover;
+    filter: brightness(25%) contrast(110%);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+    z-index: -2;
+}
+
+/* 3. KHUNG CHỨA LINKTREE CHÍNH - GIỮ NGUYÊN PHONG CÁCH CŨ */
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 40px 24px;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s cubic-bezier(0.1, 1, 0.1, 1); /* Làm mượt chuyển động khi panel đẩy container */
+}
+
+.container.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* HIỆU ỨNG ĐẨY CONTAINER CHÍNH KHI MỞ PANEL MỚI */
+body.left-panel-open .container {
+    transform: translateX(120px) scale(0.95);
+    opacity: 0.4;
+}
+body.right-panel-open .container {
+    transform: translateX(-120px) scale(0.95);
+    opacity: 0.4;
+}
+
+/* Hiệu ứng lơ lửng mượt mà cho cụm Avatar - GIỮ NGUYÊN */
+.avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 28px;
+    animation: floatAvatar 6s ease-in-out infinite;
+}
+
+.avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    animation: spinRing 12s linear infinite;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    object-fit: cover;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.08) rotate(3deg);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.15);
+}
+
+/* Font chữ viết tay lơ lửng - GIỮ NGUYÊN */
+.profile-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2.8rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-bottom: 12px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 4px 10px rgba(0, 0, 0, 0.5);
+    animation: floatName 4.5s ease-in-out infinite;
+    display: inline-block;
+}
+
+.profile-bio {
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: #b0b0b0;
+    text-transform: uppercase;
+    margin-bottom: 35px;
+    opacity: 0.85;
+    position: relative;
+}
+
+.profile-bio::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes floatAvatar {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes spinRing {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes floatName {
+    0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+/* 4. THIẾT KẾ LINK VÀ HIỆU ỨNG TƯƠNG TÁC BIẾN ĐỔI MÀU SẮC - GIỮ NGUYÊN */
+.links-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.link-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px; 
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    overflow: hidden;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                box-shadow 0.4s ease, 
+                background 0.4s ease, 
+                color 0.4s ease, 
+                border-color 0.4s ease;
+}
+
+.link-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transform: skewX(-25deg);
+}
+
+.link-item:hover::after {
+    left: 150%;
+    transition: all 0.9s cubic-bezier(0.3, 1, 0.4, 1);
+}
+
+.link-item:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #000000;
+    border-color: #ffffff;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+}
+
+.link-item i {
+    font-size: 1.2rem;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s;
+}
+
+.link-item:hover i {
+    transform: scale(1.2) rotate(360deg);
+}
+
+.link-item:nth-child(1):hover i { color: #5865F2; } 
+.link-item:nth-child(2):hover i { color: #1877F2; } 
+.link-item:nth-child(3):hover i { color: #E1306C; } 
+
+.discord-item {
+    justify-content: center;
+}
+.link-text {
+    display: flex;
+    gap: 6px;
+}
+.link-text span { font-weight: 300; opacity: 0.8;}
+
+.tooltip {
+    position: absolute;
+    top: -30px;
+    background: #ffffff;
+    color: #000000;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+.link-item:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    top: -38px;
+}
+
+/* THÀNH PHẦN MỚI: MŨI TÊN ĐIỀU HƯỚNG PANEL TRƯỢT 2 BÊN */
+.panel-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 22px 10px;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 4px;
+    backdrop-filter: blur(10px);
+}
+.panel-arrow span {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+    color: #aaa;
+    transition: color 0.3s;
+}
+.left-arrow { left: 15px; }
+.right-arrow { right: 15px; }
+
+.panel-arrow:hover {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+    border-color: #fff;
+}
+.panel-arrow:hover span {
+    color: #000000;
+}
+
+/* THÀNH PHẦN MỚI: CẤU TRÚC KHUNG PANEL TRƯỢT SANG TRỌNG */
+.side-panel {
+    position: fixed;
+    top: 0;
+    width: 360px;
+    height: 100%;
+    background: rgba(8, 8, 8, 0.96);
+    z-index: 1000;
+    padding: 50px 30px;
+    transition: all 0.6s cubic-bezier(0.1, 1, 0.1, 1);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+}
+#left-panel { left: -360px; border-right: 1px solid rgba(255, 255, 255, 0.08); }
+#right-panel { right: -360px; left: auto; border-left: 1px solid rgba(255, 255, 255, 0.08); }
+
+/* TRẠNG THÁI ACTIVE KHI TRƯỢT KHUNG RA */
+#left-panel.active { left: 0; }
+#right-panel.active { right: 0; }
+
+.close-panel-btn {
+    position: absolute;
+    top: 20px; 
+    right: 25px;
+    background: transparent; 
+    border: none;
+    color: #777; 
+    font-size: 2rem; 
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.close-panel-btn:hover { color: #fff; }
+
+.panel-content h2 {
+    font-size: 1.3rem; 
+    font-weight: 400; 
+    margin-bottom: 35px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.08); 
+    padding-bottom: 15px;
+}
+.panel-content h2 i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+.project-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+}
+.project-item {
+    background: rgba(255,255,255,0.02); 
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,0.04); 
+    border-radius: 4px;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+.project-item:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+}
+.project-item h3 { font-size: 0.95rem; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+.project-item p { font-size: 0.8rem; color: #999; line-height: 1.5; font-weight: 300; }
+.story-body p { font-size: 0.85rem; color: #ccc; line-height: 1.7; text-align: left; font-weight: 300; }
+
+/* THÀNH PHẦN MỚI: KHUNG NHẠC ĐĨA XOAY GÓC DƯỚI BÊN PHẢI */
+#music-widget {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 18px 10px 10px;
+    border-radius: 40px 8px 8px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 500;
+    max-width: 280px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+#music-widget:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 35px rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+.disc-container {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+.disc-container img {
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover;
+    animation: rotateDisc 8s linear infinite;
+    animation-play-state: paused; /* Mặc định dừng xoay */
+}
+/* Thêm class kích hoạt xoay đĩa nhạc khi nhạc phát */
+#music-widget.playing .disc-container img {
+    animation-play-state: running;
+}
+@keyframes rotateDisc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.track-info {
+    overflow: hidden;
+}
+#track-title {
+    font-size: 0.85rem; 
+    font-weight: 600; 
+    color: #ffffff;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+#track-artist {
+    font-size: 0.72rem; 
+    color: #777;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    font-weight: 300;
+}
+
+/* ĐÁP ỨNG THIẾT BỊ (RESPONSIVE) - TỐI ƯU PANEL DI ĐỘNG */
+@media (max-width: 768px) {
+    .side-panel { width: 100%; }
+    #left-panel { left: -100%; }
+    #right-panel { right: -100%; }
+    
+    body.left-panel-open .container, 
+    body.right-panel-open .container { 
+        transform: scale(0.9); 
+        opacity: 0; 
+        pointer-events: none; 
+    }
+    .panel-arrow { padding: 16px 8px; }
+    #music-widget { bottom: 15px; right: 15px; max-width: 230px; }
+}
+
+/* NÚT ĐIỀU KHIỂN CŨ - ẨN ĐỂ ĐỒNG BỘ SANG HỘP NHẠC ĐĨA XOAY MỚI */
+.music-control { display: none !important; }
+#youtube-player { display: block; }

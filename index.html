@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huỳnh Tiến Dũng | Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="loader">
+        <h1 class="loader-title">Huỳnh Tiến Dũng</h1>
+        <div class="loader-bar"></div>
+        <button id="enter-btn" onclick="startPortfolio()" style="display: none; margin-top: 25px; padding: 12px 28px; background: transparent; border: 1px solid #fff; color: #fff; cursor: pointer; font-family: 'Inter', sans-serif; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; transition: all 0.3s ease; backdrop-filter: blur(5px);">
+            Khám phá ngay
+        </button>
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+    
+    <div id="mouse-glow"></div>
+    
+    <video autoplay loop muted playsinline class="video-background">
+        <source src="background.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+
+    <div id="youtube-player" style="display: none;"></div>
+
+    <button class="music-control" id="musicBtn" onclick="toggleMusic()" style="display: none;">
+        <i class="fas fa-music" id="musicIcon"></i>
+        <span id="musicText">Bật Nhạc</span>
+    </button>
+
+    <div class="panel-arrow left-arrow" onclick="togglePanel('left', true)">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Dự Án</span>
+    </div>
+    <div class="panel-arrow right-arrow" onclick="togglePanel('right', true)">
+        <span>Story</span>
+        <i class="fa-solid fa-chevron-right"></i>
+    </div>
+
+    <div id="left-panel" class="side-panel">
+        <button class="close-panel-btn" onclick="togglePanel('left', false)">&times;</button>
+        <div class="panel-content">
+            <h2><i class="fa-solid fa-code"></i> My Projects</h2>
+            <div class="project-list">
+                <div class="project-item">
+                    <h3>Game Cờ Caro</h3>
+                    <p><a href="https://td-caro-online.vercel.app/" target="_blank">https://td-caro-online.vercel.app/</a></p>
+                </div>
+                <div class="project-item">
+                    <h3>TDRate - Hệ thống xem tỷ giá và quy đổi tiền tệ</h3>
+                    <p><a href="https://tdrate.vercel.app/" target="_blank">https://tdrate.vercel.app/</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="right-panel" class="side-panel">
+        <button class="close-panel-btn" onclick="togglePanel('right', false)">&times;</button>
+        <div class="panel-content">
+            <h2><i class="fa-solid fa-book-open"></i> Câu Chuyện Của Tôi</h2>
+            <div class="story-body">
+                <p>Tôi là Huỳnh Tiến Dũng, một người bình thường với sự tò mò lớn dành cho thế giới công nghệ. Những lúc không khám phá những chân trời lập trình mới, bạn sẽ thấy tôi nghe vài giai điệu nhẹ nhàng hoặc dành thời gian cho động vật. Đến cuối cùng, động lực cốt lõi của tôi là không ngừng phát triển, học hỏi và tìm ra những cách ý nghĩa để đóng góp cho cộng đồng.                           
+                <p>---------------------------</p>
+                <p>I'm Huynh Tien Dung, just an ordinary person with an extraordinary curiosity for the tech world. When I'm not exploring new coding horizons, you'll probably find me listening to mellow tunes or spending time with animals. Ultimately, my driving force is to grow, learn continuously, and find meaningful ways to give back to the community.
+            
+            </div>
+        </div>
+    </div>
+
+    <div class="container animate-fade-in">
+        <div class="avatar-wrapper">
+            <img src="avatar.png" alt="Huỳnh Tiến Dũng" class="avatar">
+        </div>
+        
+        <h1 class="profile-name">Huỳnh Tiến Dũng</h1>
+        
+        <p id="typing" class="profile-bio"></p>
+
+        <div class="links-container">
+            <div class="link-item discord-item" onclick="copyDiscordName('t.dxng')">
+                <i class="fa-brands fa-discord"></i>
+                <div class="link-text">
+                    <span>Discord:</span>
+                    <strong id="t.dxng">t.dxng</strong> 
+                </div>
+                <span class="tooltip" id="discordTooltip">Click để copy</span>
+            </div>
+
+            <a href="https://www.facebook.com/tdxngggg" target="_blank" class="link-item">
+                <i class="fa-brands fa-facebook-f"></i> <span>Facebook</span>
+            </a>
+
+            <a href="https://www.instagram.com/t.dxng/" target="_blank" class="link-item">
+                <i class="fa-brands fa-instagram text-icon"></i> <span>Instagram</span>
+            </a>
+        </div>
+
+        <div class="visitor-counter" style="text-align: center; margin-top: 25px; font-size: 0.85rem; opacity: 0.5; font-family: 'Inter', sans-serif; letter-spacing: 1px;">
+            <i class="fas fa-eye" style="margin-right: 5px;"></i> Lượt ghé thăm: <span id="count" style="font-weight: 600;">...</span>
+        </div>
+    </div>
+
+    <div id="music-widget" onclick="toggleMusic()">
+        <div class="disc-container">
+            <img id="track-thumb" src="https://img.youtube.com/vi/gJAbDSse5WM/hqdefault.jpg" alt="Thumbnail">
+        </div>
+        <div class="track-info">
+            <div id="track-title">Tìm Em</div>
+            <div id="track-artist">Hngle ft. Bảo Anh</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
