@@ -5,7 +5,7 @@ const youtubeVideoId = 'gJAbDSse5WM';
 let player;
 let apiReady = false;
 
-// Tùy chỉnh Tên bài hát & Nghệ sĩ hiển thị trên Widget mới
+// Tùy chỉnh Tên bài hát & Nghệ sĩ hiển thị trên Widget
 const songTitle = "Tìm Em"; 
 const songArtist = "Hngle ft. Bảo Anh";
 
@@ -27,7 +27,7 @@ const database = firebase.database();
 const counterRef = database.ref('visitor_count');
 
 // ==========================================================
-// 1. HIỆU ỨNG TYPEWRITER (ABOUT ME) - GIỮ NGUYÊN LOGIC CỦA BẠN
+// 1. HIỆU ỨNG TYPEWRITER (ABOUT ME)
 // ==========================================================
 const aboutList = [
     "Love Science",
