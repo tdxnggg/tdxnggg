@@ -111,27 +111,41 @@ function increaseVisitorCount() {
     fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
         .then(data => {
-            // Thay thế tất cả dấu chấm (.) trong chuỗi IP thành dấu gạch dưới (_) để làm key hợp lệ trong Firebase
             const userIP = data.ip.replace(/\./g, '_');
             const ipRef = database.ref('visited_ips/' + userIP);
 
-            // Kiểm tra xem IP này đã từng vào trang web của bạn chưa
             ipRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    // Nếu IP này đã tồn tại trong node 'visited_ips', dừng xử lý và KHÔNG tăng bộ đếm
-                    console.log("IP đã tồn tại. Bỏ qua ghi nhận để tránh lặp dữ liệu.");
+                    console.log("IP đã tồn tại, không ghi nhận lại.");
                 } else {
-                    // Nếu là IP mới hoàn toàn:
-                    // 1. Lưu IP này thành một Key duy nhất trên Firebase Console để đánh dấu
-                    ipRef.set(true);
+                    // Lấy số lượt xem hiện tại trên Firebase để tính Số Thứ Tự
+                    counterRef.once('value', (countSnapshot) => {
+                        const currentCount = countSnapshot.val() || 0;
+                        const nextStt = currentCount + 1; // Số thứ tự mới
 
-                    // 2. Tăng tổng lượt truy cập thực tế lên 1 đơn vị bằng cơ chế Transaction an toàn
-                    counterRef.transaction((currentCount) => (currentCount || 0) + 1);
+                        // Phát hiện thiết bị cơ bản (Windows, iPhone, Android...)
+                        let userAgent = navigator.userAgent;
+                        let deviceType = "Khác";
+                        if (userAgent.includes("Win")) deviceType = "Máy tính Windows";
+                        else if (userAgent.includes("Mac")) deviceType = "Macbook/Mac";
+                        else if (userAgent.includes("iPhone")) deviceType = "iPhone";
+                        else if (userAgent.includes("Android")) deviceType = "Điện thoại Android";
+
+                        // 1. Lưu thông tin đầy đủ vào Firebase
+                        ipRef.set({
+                            stt: nextStt,
+                            time: new Date().toLocaleString('vi-VN'),
+                            device: deviceType
+                        });
+
+                        // 2. Cập nhật bộ đếm tổng số lượt xem
+                        counterRef.set(nextStt);
+                    });
                 }
             });
         })
         .catch((error) => {
-            console.error("Lỗi lấy IP, hệ thống chuyển sang chế độ fallback an toàn:", error);
+            console.error("Lỗi lấy thông tin IP:", error);
         });
 }
 
